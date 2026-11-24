@@ -3,18 +3,44 @@ from django.contrib import messages
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
+from django.db.models import Q
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
 from .forms import RegisterForm, ProductForm
 from .models import Product, Order, OrderItem
 
 def home(request):
+    category = request.GET.get("category", "").strip()
+    q = request.GET.get("q", "").strip()
     products = Product.objects.filter(is_active=True, stock__gt=0).select_related("seller")
-    return render(request, "store/home.html", {"products": products})
+
+    if category:
+        products = products.filter(category=category)
+    if q:
+        products = products.filter(
+            Q(name__icontains=q) |
+            Q(brand__icontains=q) |
+            Q(technical_name__icontains=q) |
+            Q(target_crops__icontains=q)
+        )
+
+    categories = Product.CATEGORY_CHOICES
+    return render(request, "store/home.html", {
+        "products": products,
+        "categories": categories,
+        "selected_category": category,
+        "query": q,
+    })
 
 def product_detail(request, pk):
     product = get_object_or_404(Product, pk=pk, is_active=True)
-    return render(request, "store/product_detail.html", {"product": product})
+    related_products = Product.objects.filter(
+        category=product.category, is_active=True, stock__gt=0
+    ).exclude(pk=product.pk)[:4]
+    return render(request, "store/product_detail.html", {
+        "product": product,
+        "related_products": related_products,
+    })
 
 def register_customer(request):
     return register_role(request, "customer")
@@ -39,8 +65,48 @@ def register_role(request, role):
 def seller_dashboard(request):
     if request.user.role != "seller" and not request.user.is_staff:
         raise PermissionDenied("Seller account required.")
-    products = Product.objects.all() if request.user.is_staff else Product.objects.filter(seller=request.user)
-    return render(request, "store/seller_dashboard.html", {"products": products})
+
+    base_qs = Product.objects.all() if request.user.is_staff else Product.objects.filter(seller=request.user)
+
+    # Filter / Search
+    q = request.GET.get("q", "").strip()
+    category = request.GET.get("category", "").strip()
+    status_filter = request.GET.get("status", "").strip()
+
+    products = base_qs
+    if q:
+        products = products.filter(
+            Q(name__icontains=q) |
+            Q(sku__icontains=q) |
+            Q(brand__icontains=q) |
+            Q(technical_name__icontains=q)
+        )
+    if category:
+        products = products.filter(category=category)
+    if status_filter == "active":
+        products = products.filter(is_active=True)
+    elif status_filter == "inactive":
+        products = products.filter(is_active=False)
+    elif status_filter == "low_stock":
+        products = products.filter(stock__lte=5)
+
+    # Dashboard Metrics
+    total_count = base_qs.count()
+    active_count = base_qs.filter(is_active=True).count()
+    low_stock_count = base_qs.filter(stock__lte=5).count()
+    inventory_val = sum((p.price * p.stock) for p in base_qs)
+
+    return render(request, "store/seller_dashboard.html", {
+        "products": products,
+        "total_count": total_count,
+        "active_count": active_count,
+        "low_stock_count": low_stock_count,
+        "inventory_val": inventory_val,
+        "categories": Product.CATEGORY_CHOICES,
+        "selected_category": category,
+        "selected_status": status_filter,
+        "query": q,
+    })
 
 @login_required
 def product_create(request):
@@ -51,9 +117,9 @@ def product_create(request):
         product = form.save(commit=False)
         product.seller = request.user
         product.save()
-        messages.success(request, "Product added.")
+        messages.success(request, f"Product '{product.name}' has been added successfully.")
         return redirect("seller_dashboard")
-    return render(request, "store/product_form.html", {"form": form, "heading": "Add product"})
+    return render(request, "store/product_form.html", {"form": form, "heading": "Add New Product"})
 
 @login_required
 def product_edit(request, pk):
@@ -63,9 +129,13 @@ def product_edit(request, pk):
     form = ProductForm(request.POST or None, request.FILES or None, instance=product)
     if request.method == "POST" and form.is_valid():
         form.save()
-        messages.success(request, "Product updated.")
+        messages.success(request, f"Product '{product.name}' updated successfully.")
         return redirect("seller_dashboard")
-    return render(request, "store/product_form.html", {"form": form, "heading": "Edit product"})
+    return render(request, "store/product_form.html", {
+        "form": form,
+        "heading": f"Edit Product: {product.name}",
+        "product": product,
+    })
 
 def cart(request):
     cart_data = request.session.get("cart", {})
@@ -88,7 +158,7 @@ def add_to_cart(request, pk):
     requested = max(1, min(requested, 999))
     cart_data[str(pk)] = min(current + requested, product.stock)
     request.session["cart"] = cart_data
-    messages.success(request, "Added to cart.")
+    messages.success(request, f"Added {product.name} to cart.")
     return redirect("cart")
 
 @require_POST

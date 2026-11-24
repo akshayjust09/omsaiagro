@@ -1,13 +1,151 @@
 {% extends "base.html" %}
+{% block title %}{{ product.name }} | OM SAI AGRO{% endblock %}
+
 {% block content %}
-<div class="row g-4">
-<div class="col-md-5">{% if product.image %}<img class="img-fluid rounded-4" src="{{ product.image.url }}" alt="{{ product.name }}">{% else %}<div class="product-placeholder rounded-4">🌾</div>{% endif %}</div>
-<div class="col-md-7">
-<h1>{{ product.name }}</h1><p class="text-muted">SKU: {{ product.sku }}</p>
-<h3 class="text-success">₹{{ product.price }}</h3><p>{{ product.description }}</p>
-<p>Available stock: {{ product.stock }}</p>
-<form method="post" action="{% url 'add_to_cart' product.pk %}">{% csrf_token %}
-<label class="form-label">Quantity</label><input class="form-control mb-3" type="number" name="quantity" min="1" max="{{ product.stock }}" value="1" style="max-width:130px">
-<button class="btn btn-success">Add to cart</button></form>
-</div></div>
+<div class="container py-2">
+  <nav aria-label="breadcrumb" class="mb-3">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="{% url 'home' %}" class="text-decoration-none text-success">Store</a></li>
+      <li class="breadcrumb-item"><a href="{% url 'home' %}?category={{ product.category }}" class="text-decoration-none text-success">{{ product.get_category_display }}</a></li>
+      <li class="breadcrumb-item active" aria-current="page">{{ product.name }}</li>
+    </ol>
+  </nav>
+
+  <div class="row g-4">
+    <!-- Product Image & Badges -->
+    <div class="col-md-5">
+      <div class="card border-0 shadow-sm rounded-4 p-3 bg-white text-center">
+        {% if product.image %}
+        <img class="img-fluid rounded-3 mx-auto" src="{{ product.image.url }}" alt="{{ product.name }}" style="max-height: 380px; object-fit: contain;">
+        {% else %}
+        <div class="product-placeholder rounded-3" style="min-height: 320px; font-size: 5rem;">🌾</div>
+        {% endif %}
+
+        <div class="d-flex justify-content-center gap-2 mt-3">
+          {% if product.is_organic %}
+          <span class="badge bg-success px-3 py-2">🌿 100% Organic Certified</span>
+          {% endif %}
+          <span class="badge bg-light text-dark border px-3 py-2">{{ product.get_category_display }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Product Details & Order Panel -->
+    <div class="col-md-7">
+      <div class="card border-0 shadow-sm rounded-4 p-4 bg-white h-100">
+        {% if product.brand %}
+        <div class="text-uppercase text-muted fw-bold small mb-1">{{ product.brand }}</div>
+        {% endif %}
+        <h1 class="h2 fw-bold text-dark mb-2">{{ product.name }}</h1>
+        
+        <p class="text-muted small mb-3">
+          SKU: <span class="fw-semibold">{{ product.sku }}</span> | 
+          Sold by: <span class="fw-semibold">{{ product.seller.business_name|default:product.seller.username }}</span>
+        </p>
+
+        <!-- Pricing Section -->
+        <div class="d-flex align-items-baseline gap-3 mb-3 p-3 bg-light rounded-3">
+          <div class="h2 fw-bold text-success mb-0">₹{{ product.price }}</div>
+          {% if product.mrp and product.mrp > product.price %}
+          <div class="text-muted text-decoration-line-through fs-5">₹{{ product.mrp }}</div>
+          <span class="badge bg-danger fs-6">{{ product.discount_percentage }}% OFF</span>
+          {% endif %}
+          {% if product.package_size %}
+          <span class="text-muted small">/ {{ product.package_size }}</span>
+          {% endif %}
+        </div>
+
+        <!-- Agricultural Specifications Table -->
+        <div class="mb-4">
+          <h5 class="fw-bold text-dark mb-2">Agricultural Specifications</h5>
+          <table class="table table-bordered table-sm mb-0">
+            <tbody>
+              {% if product.technical_name %}
+              <tr>
+                <th class="bg-light w-35 text-secondary">🔬 Technical Name</th>
+                <td class="fw-semibold">{{ product.technical_name }}</td>
+              </tr>
+              {% endif %}
+              {% if product.package_size %}
+              <tr>
+                <th class="bg-light text-secondary">📦 Package Size</th>
+                <td>{{ product.package_size }}</td>
+              </tr>
+              {% endif %}
+              {% if product.target_crops %}
+              <tr>
+                <th class="bg-light text-secondary">🌱 Suitable Crops</th>
+                <td>{{ product.target_crops }}</td>
+              </tr>
+              {% endif %}
+              {% if product.dosage %}
+              <tr>
+                <th class="bg-light text-secondary">💧 Dosage / Method</th>
+                <td>{{ product.dosage }}</td>
+              </tr>
+              {% endif %}
+            </tbody>
+          </table>
+        </div>
+
+        {% if product.description %}
+        <div class="mb-4">
+          <h5 class="fw-bold text-dark mb-2">Product Description & Benefits</h5>
+          <p class="text-secondary mb-0" style="white-space: pre-line;">{{ product.description }}</p>
+        </div>
+        {% endif %}
+
+        <!-- Stock and Cart Form -->
+        <div class="mt-auto pt-3 border-top">
+          {% if product.stock > 0 %}
+          <div class="mb-2">
+            {% if product.stock > 10 %}
+            <span class="text-success fw-semibold">✔ In Stock ({{ product.stock }} units available)</span>
+            {% else %}
+            <span class="text-warning fw-semibold">⚠ Only {{ product.stock }} units left in stock!</span>
+            {% endif %}
+          </div>
+          <form method="post" action="{% url 'add_to_cart' product.pk %}" class="d-flex gap-3 align-items-center">
+            {% csrf_token %}
+            <div style="max-width: 110px;">
+              <input class="form-control text-center" type="number" name="quantity" min="1" max="{{ product.stock }}" value="1">
+            </div>
+            <button class="btn btn-success btn-lg px-4 fw-semibold shadow-sm flex-grow-1">
+              🛒 Add to Cart
+            </button>
+          </form>
+          {% else %}
+          <div class="alert alert-danger mb-0">Currently Out of Stock</div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Related Products -->
+  {% if related_products %}
+  <div class="mt-5">
+    <h3 class="fw-bold text-dark mb-3">Similar Agricultural Products</h3>
+    <div class="row g-3">
+      {% for rel in related_products %}
+      <div class="col-6 col-md-3">
+        <div class="card h-100 product-card bg-white rounded-3">
+          {% if rel.image %}
+          <img src="{{ rel.image.url }}" class="card-img-top product-img" alt="{{ rel.name }}">
+          {% else %}
+          <div class="product-placeholder">🌾</div>
+          {% endif %}
+          <div class="card-body d-flex flex-column p-3">
+            {% if rel.brand %}<small class="text-muted">{{ rel.brand }}</small>{% endif %}
+            <h6 class="card-title fw-bold text-dark mb-1">{{ rel.name }}</h6>
+            <div class="text-success fw-bold mb-2">₹{{ rel.price }}</div>
+            <a class="btn btn-sm btn-outline-success mt-auto" href="{% url 'product_detail' rel.pk %}">View Details</a>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+</div>
 {% endblock %}

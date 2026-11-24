@@ -1,5 +1,178 @@
 {% extends "base.html" %}
-{% block content %}<div class="d-flex justify-content-between align-items-center mb-3"><h1>Seller dashboard</h1><a class="btn btn-success" href="{% url 'product_create' %}">+ Add product</a></div>
-<div class="table-responsive"><table class="table table-striped"><thead><tr><th>Product</th><th>SKU</th><th>Price</th><th>Stock</th><th>Status</th><th></th></tr></thead><tbody>
-{% for p in products %}<tr><td>{{ p.name }}</td><td>{{ p.sku }}</td><td>₹{{ p.price }}</td><td>{{ p.stock }}</td><td>{{ p.is_active|yesno:"Active,Hidden" }}</td><td><a href="{% url 'product_edit' p.pk %}">Edit</a></td></tr>{% empty %}<tr><td colspan="6">No products added.</td></tr>{% endfor %}
-</tbody></table></div>{% endblock %}
+{% block title %}Seller Dashboard | OM SAI AGRO{% endblock %}
+
+{% block content %}
+<div class="container py-2">
+  <!-- Top Header -->
+  <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+    <div>
+      <h2 class="fw-bold text-dark mb-1">🌾 Seller Management Dashboard</h2>
+      <p class="text-muted small mb-0">Manage your agricultural catalog, inventory, pricing, and product specifications.</p>
+    </div>
+    <div class="d-flex gap-2">
+      <a class="btn btn-success fw-semibold shadow-sm px-4 py-2" href="{% url 'product_create' %}">
+        + Add New Product
+      </a>
+    </div>
+  </div>
+
+  <!-- KPI Summary Cards -->
+  <div class="row g-3 mb-4">
+    <div class="col-6 col-md-3">
+      <div class="card border-0 shadow-sm rounded-3 p-3 bg-white h-100 border-start border-4 border-success">
+        <div class="text-muted small fw-semibold">TOTAL PRODUCTS</div>
+        <div class="fs-3 fw-bold text-dark mt-1">{{ total_count }}</div>
+        <div class="small text-muted">All catalog items</div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="card border-0 shadow-sm rounded-3 p-3 bg-white h-100 border-start border-4 border-primary">
+        <div class="text-muted small fw-semibold">ACTIVE LISTINGS</div>
+        <div class="fs-3 fw-bold text-primary mt-1">{{ active_count }}</div>
+        <div class="small text-muted">Live on store</div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="card border-0 shadow-sm rounded-3 p-3 bg-white h-100 border-start border-4 border-warning">
+        <div class="text-muted small fw-semibold">LOW / OUT OF STOCK</div>
+        <div class="fs-3 fw-bold text-warning mt-1">{{ low_stock_count }}</div>
+        <div class="small text-muted">Stock ≤ 5 units</div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="card border-0 shadow-sm rounded-3 p-3 bg-white h-100 border-start border-4 border-info">
+        <div class="text-muted small fw-semibold">TOTAL INVENTORY VALUE</div>
+        <div class="fs-3 fw-bold text-success mt-1">₹{{ inventory_val|floatformat:2 }}</div>
+        <div class="small text-muted">At current selling price</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filters & Search Bar -->
+  <div class="card border-0 shadow-sm rounded-3 mb-4 bg-white">
+    <div class="card-body p-3">
+      <form method="get" class="row g-2 align-items-center">
+        <div class="col-12 col-md-4">
+          <input type="text" name="q" class="form-control" placeholder="Search by name, brand, SKU, chemical..." value="{{ query }}">
+        </div>
+        <div class="col-6 col-md-3">
+          <select name="category" class="form-select">
+            <option value="">All Categories</option>
+            {% for code, name in categories %}
+            <option value="{{ code }}" {% if selected_category == code %}selected{% endif %}>{{ name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="col-6 col-md-3">
+          <select name="status" class="form-select">
+            <option value="">All Statuses</option>
+            <option value="active" {% if selected_status == "active" %}selected{% endif %}>Active Only</option>
+            <option value="inactive" {% if selected_status == "inactive" %}selected{% endif %}>Hidden / Inactive</option>
+            <option value="low_stock" {% if selected_status == "low_stock" %}selected{% endif %}>Low Stock (≤ 5)</option>
+          </select>
+        </div>
+        <div class="col-12 col-md-2 d-flex gap-2">
+          <button type="submit" class="btn btn-success w-100">Filter</button>
+          {% if query or selected_category or selected_status %}
+          <a href="{% url 'seller_dashboard' %}" class="btn btn-outline-secondary">Reset</a>
+          {% endif %}
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Products Table -->
+  <div class="card border-0 shadow-sm rounded-3 bg-white overflow-hidden">
+    <div class="table-responsive">
+      <table class="table table-hover align-middle mb-0">
+        <thead class="table-light">
+          <tr>
+            <th style="width: 70px;">Photo</th>
+            <th>Product & Specs</th>
+            <th>Category</th>
+            <th>Packing Size</th>
+            <th>Price</th>
+            <th>Stock</th>
+            <th>Status</th>
+            <th class="text-end">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for p in products %}
+          <tr>
+            <td>
+              {% if p.image %}
+              <img src="{{ p.image.url }}" alt="{{ p.name }}" class="rounded border" style="width: 50px; height: 50px; object-fit: contain; background: #fff;">
+              {% else %}
+              <div class="rounded border bg-light d-flex align-items-center justify-content-center" style="width: 50px; height: 50px; font-size: 1.5rem;">🌾</div>
+              {% endif %}
+            </td>
+            <td>
+              <div class="fw-bold text-dark">{{ p.name }}</div>
+              {% if p.brand %}<span class="badge bg-secondary-subtle text-secondary me-1">{{ p.brand }}</span>{% endif %}
+              <small class="text-muted">SKU: {{ p.sku }}</small>
+              {% if p.technical_name %}
+              <div class="small text-muted text-truncate" style="max-width: 250px;">
+                🔬 {{ p.technical_name }}
+              </div>
+              {% endif %}
+              {% if p.is_organic %}
+              <span class="badge bg-success-subtle text-success mt-1">🌿 Organic</span>
+              {% endif %}
+            </td>
+            <td>
+              <span class="badge bg-light text-dark border">{{ p.get_category_display }}</span>
+            </td>
+            <td>
+              {% if p.package_size %}{{ p.package_size }}{% else %}<span class="text-muted">—</span>{% endif %}
+            </td>
+            <td>
+              <div class="fw-bold text-success">₹{{ p.price }}</div>
+              {% if p.mrp and p.mrp > p.price %}
+              <small class="text-decoration-line-through text-muted">₹{{ p.mrp }}</small>
+              <span class="badge bg-danger-subtle text-danger small">-{{ p.discount_percentage }}%</span>
+              {% endif %}
+            </td>
+            <td>
+              {% if p.stock > 10 %}
+              <span class="badge bg-success-subtle text-success">{{ p.stock }} in stock</span>
+              {% elif p.stock > 0 %}
+              <span class="badge bg-warning-subtle text-warning-emphasis">{{ p.stock }} low stock</span>
+              {% else %}
+              <span class="badge bg-danger-subtle text-danger">Out of stock</span>
+              {% endif %}
+            </td>
+            <td>
+              {% if p.is_active %}
+              <span class="badge bg-success">Active</span>
+              {% else %}
+              <span class="badge bg-secondary">Hidden</span>
+              {% endif %}
+            </td>
+            <td class="text-end">
+              <div class="btn-group btn-group-sm">
+                <a href="{% url 'product_edit' p.pk %}" class="btn btn-outline-primary" title="Edit product">
+                  ✏️ Edit
+                </a>
+                <a href="{% url 'product_detail' p.pk %}" class="btn btn-outline-secondary" title="View details" target="_blank">
+                  👁️ View
+                </a>
+              </div>
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="8" class="text-center py-5">
+              <div class="text-muted mb-3" style="font-size: 2.5rem;">🌾</div>
+              <h5 class="fw-semibold text-dark">No products found</h5>
+              <p class="text-muted small">No products match your search or you haven't added any products yet.</p>
+              <a href="{% url 'product_create' %}" class="btn btn-success btn-sm">+ Add Your First Product</a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

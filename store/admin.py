@@ -6,12 +6,14 @@ from .models import User, Product, Order, OrderItem
 class CustomUserAdmin(UserAdmin):
     fieldsets = UserAdmin.fieldsets + (("Store details", {"fields": ("role", "business_name")}),)
     add_fieldsets = UserAdmin.add_fieldsets + (("Store details", {"fields": ("role", "business_name")}),)
-    list_display = ("username", "email", "role", "is_staff", "is_active")
+    list_display = ("username", "email", "role", "business_name", "is_staff", "is_active")
+    list_filter = ("role", "is_staff", "is_active")
 
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
-    list_display = ("name", "sku", "seller", "price", "stock", "is_active")
-    search_fields = ("name", "sku")
+    list_display = ("name", "category", "brand", "package_size", "price", "stock", "is_organic", "is_active", "seller")
+    list_filter = ("category", "is_organic", "is_active", "created_at")
+    search_fields = ("name", "sku", "brand", "technical_name", "target_crops")
 
 class OrderItemInline(admin.TabularInline):
     model = OrderItem
@@ -20,6 +22,6 @@ class OrderItemInline(admin.TabularInline):
 
 @admin.register(Order)
 class OrderAdmin(admin.ModelAdmin):
-    list_display = ("id", "customer", "total", "status", "created_at")
-    list_filter = ("status", "created_at")
+    list_display = ("id", "customer", "total", "status", "payment_method", "created_at")
+    list_filter = ("status", "payment_method", "created_at")
     inlines = [OrderItemInline]
