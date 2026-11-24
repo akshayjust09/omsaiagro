@@ -2,19 +2,20 @@
 set -e
 echo "=== BUILD START ==="
 
-# Ensure target directory exists
 mkdir -p staticfiles_build
 
-# Install dependencies using uv or pip with --break-system-packages
 if command -v uv >/dev/null 2>&1; then
-    echo "Installing dependencies using uv..."
-    uv pip install --system -r requirements.txt
+    echo "Creating Python 3.12 virtual environment with uv..."
+    uv venv --python 3.12 .venv_build
+    source .venv_build/bin/activate
+    echo "Installing dependencies..."
+    uv pip install -r requirements.txt
+    echo "Collecting static files..."
+    python manage.py collectstatic --noinput --clear
+else
+    echo "Using python3..."
+    python3 -m pip install --break-system-packages -r requirements.txt
+    python3 manage.py collectstatic --noinput --clear
 fi
-
-python3 -m pip install --break-system-packages -r requirements.txt || true
-
-# Collect static files
-echo "Collecting static files..."
-python3 manage.py collectstatic --noinput --clear
 
 echo "=== BUILD END ==="
