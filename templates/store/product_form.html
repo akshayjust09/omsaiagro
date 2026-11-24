@@ -194,13 +194,22 @@
 
           <div class="col-12">
             <label class="form-label fw-semibold" for="{{ form.image.id_for_label }}">
-              Product Image
+              Upload Product Photo (File)
             </label>
             {{ form.image }}
-            {% if product and product.image %}
+            <div class="form-text small">Upload an image file from your computer or phone.</div>
+          </div>
+
+          <div class="col-12">
+            <label class="form-label fw-semibold" for="{{ form.image_url.id_for_label }}">
+              Or Paste Product Image URL
+            </label>
+            {{ form.image_url }}
+            <div class="form-text small">e.g. https://m.media-amazon.com/images/I/517NScaIFIL.jpg</div>
+            {% if product and product.display_image %}
             <div class="mt-2 d-flex align-items-center gap-3 p-2 border rounded-3 bg-light">
-              <img src="{{ product.image.url }}" alt="{{ product.name }}" style="height: 60px; width: 60px; object-fit: contain; background: white; border-radius: 8px;">
-              <div class="small text-muted">Current photo attached. Uploading a new file will replace it.</div>
+              <img src="{{ product.display_image }}" alt="{{ product.name }}" style="height: 60px; width: 60px; object-fit: contain; background: white; border-radius: 8px;">
+              <div class="small text-muted">Current photo attached. Uploading a new file or changing the URL will replace it.</div>
             </div>
             {% endif %}
           </div>

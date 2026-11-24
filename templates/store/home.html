@@ -58,8 +58,8 @@
       <span class="position-absolute top-0 end-0 badge bg-success m-2">🌿 Organic</span>
       {% endif %}
 
-      {% if product.image %}
-      <img src="{{ product.image.url }}" class="card-img-top product-img" alt="{{ product.name }}">
+      {% if product.display_image %}
+      <img src="{{ product.display_image }}" class="card-img-top product-img" alt="{{ product.name }}">
       {% else %}
       <div class="product-placeholder">🌾</div>
       {% endif %}

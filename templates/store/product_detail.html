@@ -15,8 +15,8 @@
     <!-- Product Image & Badges -->
     <div class="col-md-5">
       <div class="card border-0 shadow-sm rounded-4 p-3 bg-white text-center">
-        {% if product.image %}
-        <img class="img-fluid rounded-3 mx-auto" src="{{ product.image.url }}" alt="{{ product.name }}" style="max-height: 380px; object-fit: contain;">
+        {% if product.display_image %}
+        <img class="img-fluid rounded-3 mx-auto" src="{{ product.display_image }}" alt="{{ product.name }}" style="max-height: 380px; object-fit: contain;">
         {% else %}
         <div class="product-placeholder rounded-3" style="min-height: 320px; font-size: 5rem;">🌾</div>
         {% endif %}
@@ -130,8 +130,8 @@
       {% for rel in related_products %}
       <div class="col-6 col-md-3">
         <div class="card h-100 product-card bg-white rounded-3">
-          {% if rel.image %}
-          <img src="{{ rel.image.url }}" class="card-img-top product-img" alt="{{ rel.name }}">
+          {% if rel.display_image %}
+          <img src="{{ rel.display_image }}" class="card-img-top product-img" alt="{{ rel.name }}">
           {% else %}
           <div class="product-placeholder">🌾</div>
           {% endif %}

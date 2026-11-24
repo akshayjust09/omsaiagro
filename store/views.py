@@ -1,3 +1,4 @@
+import base64
 from datetime import timedelta
 from decimal import Decimal
 from django.contrib import messages
@@ -227,6 +228,17 @@ def order_update_status(request, pk):
         messages.success(request, f"Order #{order.pk} status updated to '{valid_statuses[new_status]}'.")
     return redirect(f"{request.META.get('HTTP_REFERER', '/seller/')}?tab=orders")
 
+def _handle_product_media(product, uploaded_file):
+    if uploaded_file:
+        try:
+            content = uploaded_file.read()
+            content_type = getattr(uploaded_file, "content_type", "") or "image/jpeg"
+            b64_str = base64.b64encode(content).decode("utf-8")
+            product.image_url = f"data:{content_type};base64,{b64_str}"
+            product.image = None
+        except Exception:
+            pass
+
 @login_required
 def product_create(request):
     if request.user.role != "seller" and not request.user.is_staff:
@@ -235,6 +247,7 @@ def product_create(request):
     if request.method == "POST" and form.is_valid():
         product = form.save(commit=False)
         product.seller = request.user
+        _handle_product_media(product, request.FILES.get("image"))
         product.save()
         messages.success(request, f"Product '{product.name}' has been added to your Amazon-style catalog.")
         return redirect("/seller/?tab=inventory")
@@ -247,7 +260,9 @@ def product_edit(request, pk):
         raise PermissionDenied("You can edit only your own products.")
     form = ProductForm(request.POST or None, request.FILES or None, instance=product)
     if request.method == "POST" and form.is_valid():
-        form.save()
+        product = form.save(commit=False)
+        _handle_product_media(product, request.FILES.get("image"))
+        product.save()
         messages.success(request, f"Listing for '{product.name}' updated successfully.")
         return redirect("/seller/?tab=inventory")
     return render(request, "store/product_form.html", {

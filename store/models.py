@@ -38,6 +38,7 @@ class Product(models.Model):
     stock = models.PositiveIntegerField(default=0, verbose_name="Available Stock Quantity")
     description = models.TextField(blank=True, verbose_name="Detailed Description / Benefits")
     image = models.ImageField(upload_to="products/", blank=True, null=True, verbose_name="Product Photo")
+    image_url = models.TextField(blank=True, verbose_name="Image URL or Encoded Photo")
     is_organic = models.BooleanField(default=False, verbose_name="100% Organic / Bio-certified")
     is_active = models.BooleanField(default=True, verbose_name="Active (Visible in Store)")
     created_at = models.DateTimeField(auto_now_add=True)
@@ -48,6 +49,17 @@ class Product(models.Model):
 
     def __str__(self):
         return f"{self.name} ({self.get_category_display()})"
+
+    @property
+    def display_image(self):
+        if self.image_url:
+            return self.image_url
+        if self.image:
+            try:
+                return self.image.url
+            except Exception:
+                return None
+        return None
 
     @property
     def discount_percentage(self):

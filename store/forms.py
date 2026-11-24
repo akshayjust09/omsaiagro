@@ -22,7 +22,7 @@ class ProductForm(forms.ModelForm):
             "name", "category", "brand", "sku",
             "technical_name", "package_size", "target_crops", "dosage",
             "price", "mrp", "stock", "description",
-            "image", "is_organic", "is_active"
+            "image", "image_url", "is_organic", "is_active"
         )
         widgets = {
             "name": forms.TextInput(attrs={"class": "form-control", "placeholder": "e.g. Mahyco Cotton Seeds / Coragen / NPK 19-19-19"}),
@@ -38,6 +38,7 @@ class ProductForm(forms.ModelForm):
             "stock": forms.NumberInput(attrs={"class": "form-control", "placeholder": "e.g. 50"}),
             "description": forms.Textarea(attrs={"class": "form-control", "rows": 4, "placeholder": "Describe benefits, application timing, precautions, safety tips..."}),
             "image": forms.FileInput(attrs={"class": "form-control"}),
+            "image_url": forms.URLInput(attrs={"class": "form-control", "placeholder": "https://m.media-amazon.com/images/I/..."}),
             "is_organic": forms.CheckboxInput(attrs={"class": "form-check-input"}),
             "is_active": forms.CheckboxInput(attrs={"class": "form-check-input"}),
         }
