@@ -9,3 +9,10 @@ body { background: #f7f9f5; color: #203126; font-family: system-ui, -apple-syste
 .form-panel input, .form-panel select, .form-panel textarea { max-width:100%; }
 .bg-success-subtle { background-color: #eaf6ea !important; }
 .table > :not(caption) > * > * { padding: 0.75rem 0.85rem; }
+
+/* Amazon Seller Central Specific Styles */
+.amazon-seller-wrapper { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; }
+.amazon-nav-tabs .nav-link { color: #374151; font-weight: 500; font-size: 0.92rem; padding: 0.55rem 1.1rem; border-radius: 6px; transition: all 0.15s ease; }
+.amazon-nav-tabs .nav-link:hover { color: #111827; background: #f3f4f6; }
+.amazon-nav-tabs .active-amazon { background: #131921 !important; color: #ffffff !important; font-weight: 600; box-shadow: 0 2px 6px rgba(0,0,0,0.15); }
+.tracking-wide { letter-spacing: 0.04em; }
