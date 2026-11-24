@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+{% block title %}Sign In to Seller Central | OM SAI AGRO{% endblock %}
+
+{% block content %}
+<div class="container py-3">
+  <!-- Seller Central Mini Header -->
+  <div class="text-center mb-4">
+    <div class="d-inline-flex align-items-baseline p-2 px-4 rounded-3 text-white shadow-sm" style="background: #131921;">
+      <span class="fs-4 fw-bold text-white tracking-wide">OM SAI AGRO</span>
+      <span class="ms-2 badge text-dark fw-bold" style="background: #ff9900; font-size: 0.75rem;">SELLER CENTRAL</span>
+    </div>
+  </div>
+
+  <div class="row justify-content-center">
+    <div class="col-12 col-md-8 col-lg-5">
+      <!-- Amazon Style Sign-In Box -->
+      <div class="card border rounded-3 shadow-sm bg-white p-4 p-md-5 mb-4" style="border-color: #d5d9d9 !important;">
+        <h2 class="fw-bold text-dark mb-1" style="font-size: 1.75rem;">Sign In</h2>
+        <p class="text-muted small mb-4">Sign in to manage your inventory, orders, and sales performance.</p>
+
+        {% if form.errors %}
+        <div class="alert alert-danger py-2 small mb-3" role="alert">
+          {% for field, errors in form.errors.items %}
+            {% for error in errors %}
+              <div>{{ error }}</div>
+            {% endfor %}
+          {% endfor %}
+          {% if form.non_field_errors %}
+            {% for error in form.non_field_errors %}
+              <div>{{ error }}</div>
+            {% endfor %}
+          {% endif %}
+        </div>
+        {% endif %}
+
+        <form method="post" novalidate>
+          {% csrf_token %}
+          <input type="hidden" name="next" value="{{ request.GET.next }}">
+
+          <!-- Username Field -->
+          <div class="mb-3">
+            <label class="form-label fw-bold small text-dark mb-1" for="id_username">
+              Username or Registered Email
+            </label>
+            <input type="text" name="username" autofocus autocapitalize="none" autocomplete="username" maxlength="150" required class="form-control" id="id_username" placeholder="e.g. om_agro_agency" value="{{ form.username.value|default:'' }}">
+          </div>
+
+          <!-- Password Field -->
+          <div class="mb-3">
+            <div class="d-flex justify-content-between align-items-center mb-1">
+              <label class="form-label fw-bold small text-dark mb-0" for="id_password">
+                Password
+              </label>
+            </div>
+            <input type="password" name="password" autocomplete="current-password" required class="form-control" id="id_password" placeholder="••••••••">
+          </div>
+
+          <!-- Remember Me Checkbox -->
+          <div class="form-check mb-4">
+            <input class="form-check-input" type="checkbox" id="remember_me" checked>
+            <label class="form-check-label small text-secondary" for="remember_me">
+              Keep me signed in to Seller Central
+            </label>
+          </div>
+
+          <!-- Amazon Style Gold Sign-In Button -->
+          <button type="submit" class="btn w-100 fw-bold py-2 shadow-sm mb-3" style="background: #f0c14b; border: 1px solid #a88734; color: #111;">
+            Sign In to Seller Central
+          </button>
+
+          <!-- Disclaimer Note -->
+          <p class="text-muted small mb-0" style="font-size: 0.78rem;">
+            By signing in, you agree to OM SAI AGRO's <a href="#" class="text-decoration-none text-success">Conditions of Use</a> and <a href="#" class="text-decoration-none text-success">Seller Privacy Notice</a>.
+          </p>
+        </form>
+
+        <!-- Divider -->
+        <div class="position-relative my-4 text-center">
+          <hr class="text-muted">
+          <span class="position-absolute top-50 start-50 translate-middle bg-white px-2 small text-muted">
+            New to OM SAI AGRO Seller Central?
+          </span>
+        </div>
+
+        <!-- Create Seller Account Button -->
+        <a href="{% url 'register_seller' %}" class="btn btn-outline-secondary w-100 py-2 fw-semibold shadow-sm" style="background: #e7e9ec; color: #111; border-color: #adb1b8;">
+          Register as an Agro Seller
+        </a>
+      </div>
+
+      <!-- Customer Login Switch -->
+      <div class="card border-0 bg-light p-3 rounded-3 text-center mb-4">
+        <span class="small text-muted">
+          Looking to purchase agricultural products as a farmer?
+          <a href="{% url 'login' %}" class="text-success fw-bold text-decoration-none ms-1">Customer Sign In →</a>
+        </span>
+      </div>
+
+      <!-- Seller Central Value Propositions -->
+      <div class="row g-2 text-center text-muted small">
+        <div class="col-4">
+          <div class="p-2 border rounded bg-white">
+            <div class="fs-5">🌾</div>
+            <strong class="d-block text-dark" style="font-size: 0.8rem;">Direct Farmers</strong>
+            <span style="font-size: 0.72rem;">Pan-India Reach</span>
+          </div>
+        </div>
+        <div class="col-4">
+          <div class="p-2 border rounded bg-white">
+            <div class="fs-5">📦</div>
+            <strong class="d-block text-dark" style="font-size: 0.8rem;">Easy Shipping</strong>
+            <span style="font-size: 0.72rem;">COD Integrated</span>
+          </div>
+        </div>
+        <div class="col-4">
+          <div class="p-2 border rounded bg-white">
+            <div class="fs-5">💰</div>
+            <strong class="d-block text-dark" style="font-size: 0.8rem;">Fast Payouts</strong>
+            <span style="font-size: 0.72rem;">0% Setup Fee</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

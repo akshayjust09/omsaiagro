@@ -1,5 +1,75 @@
 {% extends "base.html" %}
-{% block content %}<div class="form-panel mx-auto"><h1>Login</h1>
-<form method="post">{% csrf_token %}{{ form.as_p }}<button class="btn btn-success w-100">Login</button></form>
-<p class="mt-3">Customer? <a href="{% url 'register_customer' %}">Create account</a></p>
-<p>Seller? <a href="{% url 'register_seller' %}">Register as seller</a></p></div>{% endblock %}
+{% block title %}Sign In | OM SAI AGRO{% endblock %}
+
+{% block content %}
+<div class="container py-3">
+  <div class="row justify-content-center">
+    <div class="col-12 col-md-8 col-lg-5">
+      <div class="card border rounded-3 shadow-sm bg-white p-4 p-md-5 mb-4">
+        <!-- Logo & Header -->
+        <div class="text-center mb-4">
+          <div class="fs-2 mb-1">🌱</div>
+          <h2 class="fw-bold text-dark mb-1">Welcome Back</h2>
+          <p class="text-muted small">Sign in to your OM SAI AGRO customer account.</p>
+        </div>
+
+        {% if form.errors %}
+        <div class="alert alert-danger py-2 small mb-3" role="alert">
+          {% for field, errors in form.errors.items %}
+            {% for error in errors %}
+              <div>{{ error }}</div>
+            {% endfor %}
+          {% endfor %}
+          {% if form.non_field_errors %}
+            {% for error in form.non_field_errors %}
+              <div>{{ error }}</div>
+            {% endfor %}
+          {% endif %}
+        </div>
+        {% endif %}
+
+        <form method="post" novalidate>
+          {% csrf_token %}
+          <input type="hidden" name="next" value="{{ request.GET.next }}">
+
+          <div class="mb-3">
+            <label class="form-label fw-bold small text-dark mb-1" for="id_username">
+              Username
+            </label>
+            <input type="text" name="username" autofocus autocomplete="username" required class="form-control" id="id_username" placeholder="Your username" value="{{ form.username.value|default:'' }}">
+          </div>
+
+          <div class="mb-4">
+            <label class="form-label fw-bold small text-dark mb-1" for="id_password">
+              Password
+            </label>
+            <input type="password" name="password" autocomplete="current-password" required class="form-control" id="id_password" placeholder="••••••••">
+          </div>
+
+          <button type="submit" class="btn btn-success w-100 fw-bold py-2 shadow-sm mb-3">
+            Sign In to Store
+          </button>
+        </form>
+
+        <div class="text-center mt-3 small text-muted">
+          New customer? <a href="{% url 'register_customer' %}" class="text-success fw-bold text-decoration-none">Create a customer account</a>
+        </div>
+      </div>
+
+      <!-- Seller Central Callout Card -->
+      <div class="card border rounded-3 shadow-sm p-4 bg-white text-center">
+        <div class="d-flex align-items-center justify-content-center gap-2 mb-2">
+          <span class="fs-4">🏪</span>
+          <h5 class="fw-bold text-dark mb-0">Are you an Agri Seller / Dealer?</h5>
+        </div>
+        <p class="text-muted small mb-3">
+          Manage your farm product catalog, stock inventory, and customer orders via our dedicated Amazon-style Seller Central.
+        </p>
+        <a href="{% url 'seller_login' %}" class="btn fw-semibold w-100 py-2 text-dark shadow-sm" style="background: #ff9900; border-color: #de8300;">
+          Sign In to Seller Central →
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

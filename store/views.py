@@ -3,6 +3,7 @@ from datetime import timedelta
 from decimal import Decimal
 from django.contrib import messages
 from django.contrib.auth import login
+from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.db.models import Q, Sum
@@ -63,6 +64,52 @@ def register_role(request, role):
         messages.success(request, "Your account has been created.")
         return redirect("seller_dashboard" if role == "seller" else "home")
     return render(request, "store/register.html", {"form": form, "role": role})
+
+def seller_login(request):
+    if request.user.is_authenticated:
+        if request.user.role == "seller" or request.user.is_staff:
+            return redirect("seller_dashboard")
+        return redirect("home")
+
+    form = AuthenticationForm(request, data=request.POST or None)
+    if request.method == "POST":
+        if form.is_valid():
+            user = form.get_user()
+            login(request, user)
+            messages.success(request, f"Welcome to Seller Central, {user.business_name or user.username}!")
+            next_url = request.GET.get("next") or request.POST.get("next")
+            if next_url:
+                return redirect(next_url)
+            if user.role == "seller" or user.is_staff:
+                return redirect("seller_dashboard")
+            return redirect("home")
+        else:
+            messages.error(request, "Invalid username or password. Please verify your seller credentials.")
+
+    return render(request, "store/seller_login.html", {"form": form})
+
+def user_login(request):
+    if request.user.is_authenticated:
+        if request.user.role == "seller" or request.user.is_staff:
+            return redirect("seller_dashboard")
+        return redirect("home")
+
+    form = AuthenticationForm(request, data=request.POST or None)
+    if request.method == "POST":
+        if form.is_valid():
+            user = form.get_user()
+            login(request, user)
+            messages.success(request, f"Welcome back, {user.username}!")
+            next_url = request.GET.get("next") or request.POST.get("next")
+            if next_url:
+                return redirect(next_url)
+            if user.role == "seller" or user.is_staff:
+                return redirect("seller_dashboard")
+            return redirect("home")
+        else:
+            messages.error(request, "Invalid username or password.")
+
+    return render(request, "store/login.html", {"form": form})
 
 @login_required
 def seller_dashboard(request):
