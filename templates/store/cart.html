@@ -1,0 +1,6 @@
+{% extends "base.html" %}
+{% block content %}<h1>Your cart</h1>
+{% if items %}<div class="table-responsive"><table class="table"><thead><tr><th>Product</th><th>Qty</th><th>Amount</th><th></th></tr></thead><tbody>
+{% for item in items %}<tr><td>{{ item.product.name }}</td><td>{{ item.quantity }}</td><td>₹{{ item.line_total }}</td><td><form method="post" action="{% url 'remove_from_cart' item.product.pk %}">{% csrf_token %}<button class="btn btn-sm btn-outline-danger">Remove</button></form></td></tr>{% endfor %}
+</tbody></table></div><h3>Total: ₹{{ total }}</h3><a class="btn btn-success" href="{% url 'checkout' %}">Checkout</a>
+{% else %}<p>Your cart is empty.</p><a href="{% url 'home' %}" class="btn btn-outline-success">Continue shopping</a>{% endif %}{% endblock %}

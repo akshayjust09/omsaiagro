@@ -1,0 +1,5 @@
+{% extends "base.html" %}
+{% block content %}<div class="d-flex justify-content-between align-items-center mb-3"><h1>Seller dashboard</h1><a class="btn btn-success" href="{% url 'product_create' %}">+ Add product</a></div>
+<div class="table-responsive"><table class="table table-striped"><thead><tr><th>Product</th><th>SKU</th><th>Price</th><th>Stock</th><th>Status</th><th></th></tr></thead><tbody>
+{% for p in products %}<tr><td>{{ p.name }}</td><td>{{ p.sku }}</td><td>₹{{ p.price }}</td><td>{{ p.stock }}</td><td>{{ p.is_active|yesno:"Active,Hidden" }}</td><td><a href="{% url 'product_edit' p.pk %}">Edit</a></td></tr>{% empty %}<tr><td colspan="6">No products added.</td></tr>{% endfor %}
+</tbody></table></div>{% endblock %}

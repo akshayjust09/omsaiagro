@@ -1,0 +1,5 @@
+{% extends "base.html" %}
+{% block content %}<div class="form-panel mx-auto"><h1>Login</h1>
+<form method="post">{% csrf_token %}{{ form.as_p }}<button class="btn btn-success w-100">Login</button></form>
+<p class="mt-3">Customer? <a href="{% url 'register_customer' %}">Create account</a></p>
+<p>Seller? <a href="{% url 'register_seller' %}">Register as seller</a></p></div>{% endblock %}

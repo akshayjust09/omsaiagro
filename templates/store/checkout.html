@@ -1,0 +1,8 @@
+{% extends "base.html" %}
+{% block content %}<div class="form-panel mx-auto"><h1>Checkout</h1><p>Order total: <strong>₹{{ total }}</strong></p><p>Payment method: Cash on Delivery</p>
+<form method="post">{% csrf_token %}
+<div class="mb-3"><label class="form-label">Full name</label><input class="form-control" name="full_name" required></div>
+<div class="mb-3"><label class="form-label">Mobile number</label><input class="form-control" name="phone" required></div>
+<div class="mb-3"><label class="form-label">Delivery address</label><textarea class="form-control" name="address" required></textarea></div>
+<div class="mb-3"><label class="form-label">PIN code</label><input class="form-control" name="pincode" required></div>
+<button class="btn btn-success w-100">Place COD order</button></form></div>{% endblock %}

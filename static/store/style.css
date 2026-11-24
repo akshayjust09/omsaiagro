@@ -1,0 +1,8 @@
+body { background: #f7f9f5; color: #203126; }
+.agro-nav { background: #174b2a; }
+.hero { background: linear-gradient(120deg, #e5f4df, #f5f8e9); }
+.product-card { border: 0; box-shadow: 0 4px 18px rgba(20,50,20,.07); }
+.product-img { height: 190px; object-fit: contain; padding: 12px; background: white; }
+.product-placeholder { min-height: 190px; display:flex; align-items:center; justify-content:center; font-size:4rem; background:#edf5e8; }
+.form-panel { max-width: 560px; background: white; padding: 28px; border-radius: 16px; box-shadow: 0 5px 22px rgba(20,50,20,.08); }
+.form-panel input, .form-panel select, .form-panel textarea { max-width:100%; }

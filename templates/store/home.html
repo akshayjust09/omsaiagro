@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}OM SAI AGRO | Farm Products{% endblock %}
+{% block content %}
+<section class="hero p-4 p-md-5 rounded-4 mb-4">
+  <h1 class="display-6 fw-bold">Agriculture essentials, delivered.</h1>
+  <p class="lead">Mulching, irrigation and nursery products for your farm.</p>
+  <a href="#products" class="btn btn-success btn-lg">Shop products</a>
+</section>
+<h2 id="products" class="mb-3">Featured products</h2>
+<div class="row g-3">
+{% for product in products %}
+<div class="col-6 col-md-4 col-lg-3">
+  <div class="card h-100 product-card">
+    {% if product.image %}<img src="{{ product.image.url }}" class="card-img-top product-img" alt="{{ product.name }}">{% else %}<div class="product-placeholder">🌾</div>{% endif %}
+    <div class="card-body d-flex flex-column">
+      <h5 class="card-title">{{ product.name }}</h5>
+      <p class="text-success fw-bold">₹{{ product.price }}</p>
+      <a class="btn btn-outline-success mt-auto" href="{% url 'product_detail' product.pk %}">View product</a>
+    </div>
+  </div>
+</div>
+{% empty %}<p>No products yet. Register as a seller and add your first product.</p>{% endfor %}
+</div>
+<div class="mt-4"><a href="{% url 'register_seller' %}">Become a seller</a></div>
+{% endblock %}
