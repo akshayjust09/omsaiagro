@@ -1,22 +1,24 @@
 {% extends "base.html" %}
-{% block title %}Sign In to Seller Central | OM SAI AGRO{% endblock %}
+{% block title %}Seller Central Sign In | OM SAI AGRO{% endblock %}
 
 {% block content %}
 <div class="container py-3">
   <!-- Seller Central Mini Header -->
   <div class="text-center mb-4">
-    <div class="d-inline-flex align-items-baseline p-2 px-4 rounded-3 text-white shadow-sm" style="background: #131921;">
-      <span class="fs-4 fw-bold text-white tracking-wide">OM SAI AGRO</span>
-      <span class="ms-2 badge text-dark fw-bold" style="background: #ff9900; font-size: 0.75rem;">SELLER CENTRAL</span>
+    <div class="d-inline-flex align-items-center p-2 px-4 rounded-pill shadow-sm" style="background: #174b2a; color: white;">
+      <span class="fs-4 fw-bold tracking-wide">🌱 OM SAI AGRO</span>
+      <span class="ms-2 badge text-dark fw-bold rounded-pill" style="background: #eaf6ea; color: #174b2a !important; font-size: 0.78rem;">SELLER CENTRAL</span>
     </div>
   </div>
 
   <div class="row justify-content-center">
     <div class="col-12 col-md-8 col-lg-5">
-      <!-- Amazon Style Sign-In Box -->
-      <div class="card border rounded-3 shadow-sm bg-white p-4 p-md-5 mb-4" style="border-color: #d5d9d9 !important;">
-        <h2 class="fw-bold text-dark mb-1" style="font-size: 1.75rem;">Sign In</h2>
-        <p class="text-muted small mb-4">Sign in to manage your inventory, orders, and sales performance.</p>
+      <!-- Agro-Themed Sign-In Box -->
+      <div class="card agro-card p-4 p-md-5 mb-4">
+        <div class="text-center mb-3">
+          <h2 class="fw-bold mb-1" style="color: #174b2a; font-size: 1.75rem;">Seller Sign In</h2>
+          <p class="text-muted small">Sign in to your Amazon-style Seller Central to manage inventory, catalog & customer orders.</p>
+        </div>
 
         {% if form.errors %}
         <div class="alert alert-danger py-2 small mb-3" role="alert">
@@ -47,11 +49,9 @@
 
           <!-- Password Field -->
           <div class="mb-3">
-            <div class="d-flex justify-content-between align-items-center mb-1">
-              <label class="form-label fw-bold small text-dark mb-0" for="id_password">
-                Password
-              </label>
-            </div>
+            <label class="form-label fw-bold small text-dark mb-1" for="id_password">
+              Password
+            </label>
             <input type="password" name="password" autocomplete="current-password" required class="form-control" id="id_password" placeholder="••••••••">
           </div>
 
@@ -63,59 +63,59 @@
             </label>
           </div>
 
-          <!-- Amazon Style Gold Sign-In Button -->
-          <button type="submit" class="btn w-100 fw-bold py-2 shadow-sm mb-3" style="background: #f0c14b; border: 1px solid #a88734; color: #111;">
+          <!-- Agro Green Sign-In Button -->
+          <button type="submit" class="btn btn-agro w-100 py-2 shadow-sm mb-3">
             Sign In to Seller Central
           </button>
 
           <!-- Disclaimer Note -->
-          <p class="text-muted small mb-0" style="font-size: 0.78rem;">
-            By signing in, you agree to OM SAI AGRO's <a href="#" class="text-decoration-none text-success">Conditions of Use</a> and <a href="#" class="text-decoration-none text-success">Seller Privacy Notice</a>.
+          <p class="text-muted small mb-0 text-center" style="font-size: 0.78rem;">
+            By signing in, you agree to OM SAI AGRO's <a href="#" class="text-decoration-none" style="color: #174b2a;">Conditions of Use</a> and <a href="#" class="text-decoration-none" style="color: #174b2a;">Seller Privacy Notice</a>.
           </p>
         </form>
 
         <!-- Divider -->
         <div class="position-relative my-4 text-center">
-          <hr class="text-muted">
+          <hr class="text-muted opacity-25">
           <span class="position-absolute top-50 start-50 translate-middle bg-white px-2 small text-muted">
             New to OM SAI AGRO Seller Central?
           </span>
         </div>
 
         <!-- Create Seller Account Button -->
-        <a href="{% url 'register_seller' %}" class="btn btn-outline-secondary w-100 py-2 fw-semibold shadow-sm" style="background: #e7e9ec; color: #111; border-color: #adb1b8;">
+        <a href="{% url 'register_seller' %}" class="btn btn-outline-agro w-100 py-2 shadow-sm">
           Register as an Agro Seller
         </a>
       </div>
 
       <!-- Customer Login Switch -->
-      <div class="card border-0 bg-light p-3 rounded-3 text-center mb-4">
-        <span class="small text-muted">
+      <div class="card border-0 p-3 rounded-3 text-center mb-4" style="background: #eaf6ea; border: 1px solid #c3e6cb !important;">
+        <span class="small" style="color: #174b2a;">
           Looking to purchase agricultural products as a farmer?
-          <a href="{% url 'login' %}" class="text-success fw-bold text-decoration-none ms-1">Customer Sign In →</a>
+          <a href="{% url 'login' %}" class="fw-bold text-decoration-none ms-1" style="color: #174b2a; text-decoration: underline !important;">Customer Sign In →</a>
         </span>
       </div>
 
       <!-- Seller Central Value Propositions -->
       <div class="row g-2 text-center text-muted small">
         <div class="col-4">
-          <div class="p-2 border rounded bg-white">
+          <div class="p-2 border rounded-3 bg-white shadow-sm">
             <div class="fs-5">🌾</div>
-            <strong class="d-block text-dark" style="font-size: 0.8rem;">Direct Farmers</strong>
+            <strong class="d-block" style="color: #174b2a; font-size: 0.8rem;">Direct Farmers</strong>
             <span style="font-size: 0.72rem;">Pan-India Reach</span>
           </div>
         </div>
         <div class="col-4">
-          <div class="p-2 border rounded bg-white">
+          <div class="p-2 border rounded-3 bg-white shadow-sm">
             <div class="fs-5">📦</div>
-            <strong class="d-block text-dark" style="font-size: 0.8rem;">Easy Shipping</strong>
+            <strong class="d-block" style="color: #174b2a; font-size: 0.8rem;">Easy Shipping</strong>
             <span style="font-size: 0.72rem;">COD Integrated</span>
           </div>
         </div>
         <div class="col-4">
-          <div class="p-2 border rounded bg-white">
+          <div class="p-2 border rounded-3 bg-white shadow-sm">
             <div class="fs-5">💰</div>
-            <strong class="d-block text-dark" style="font-size: 0.8rem;">Fast Payouts</strong>
+            <strong class="d-block" style="color: #174b2a; font-size: 0.8rem;">Fast Payouts</strong>
             <span style="font-size: 0.72rem;">0% Setup Fee</span>
           </div>
         </div>

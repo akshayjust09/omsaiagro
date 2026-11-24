@@ -1,4 +1,73 @@
 {% extends "base.html" %}
-{% block content %}<div class="form-panel mx-auto"><h1>Register {{ role|title }}</h1>
-<form method="post">{% csrf_token %}{{ form.as_p }}<button class="btn btn-success w-100">Create account</button></form>
-<p class="mt-3"><a href="{% url 'login' %}">Already have an account? Login</a></p></div>{% endblock %}
+{% block title %}Register as {{ role|title }} | OM SAI AGRO{% endblock %}
+
+{% block content %}
+<div class="container py-3">
+  <!-- Brand Header -->
+  <div class="text-center mb-4">
+    <div class="d-inline-flex align-items-center p-2 px-4 rounded-pill shadow-sm" style="background: #174b2a; color: white;">
+      <span class="fs-4 fw-bold tracking-wide">🌱 OM SAI AGRO</span>
+      {% if role == 'seller' %}
+      <span class="ms-2 badge text-dark fw-bold rounded-pill" style="background: #eaf6ea; color: #174b2a !important; font-size: 0.78rem;">SELLER ONBOARDING</span>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="row justify-content-center">
+    <div class="col-12 col-md-8 col-lg-6">
+      <div class="card agro-card p-4 p-md-5 mb-4">
+        <div class="text-center mb-4">
+          <h2 class="fw-bold mb-1" style="color: #174b2a; font-size: 1.75rem;">
+            {% if role == 'seller' %}Register as an Agro Seller{% else %}Create Customer Account{% endif %}
+          </h2>
+          <p class="text-muted small">
+            {% if role == 'seller' %}
+            Start selling seeds, fertilizers, and agri equipment to thousands of farmers.
+            {% else %}
+            Get high-quality agricultural essentials delivered directly to your farm.
+            {% endif %}
+          </p>
+        </div>
+
+        {% if form.errors %}
+        <div class="alert alert-danger py-2 small mb-3" role="alert">
+          {% for field, errors in form.errors.items %}
+            {% for error in errors %}
+              <div><strong>{{ field|title }}:</strong> {{ error }}</div>
+            {% endfor %}
+          {% endfor %}
+        </div>
+        {% endif %}
+
+        <form method="post" novalidate>
+          {% csrf_token %}
+
+          {% for field in form %}
+          <div class="mb-3">
+            <label class="form-label fw-bold small text-dark mb-1" for="{{ field.id_for_label }}">
+              {{ field.label }}
+              {% if field.field.required %}<span class="text-danger">*</span>{% endif %}
+            </label>
+            {{ field }}
+            {% if field.help_text %}
+            <div class="form-text small text-muted">{{ field.help_text }}</div>
+            {% endif %}
+          </div>
+          {% endfor %}
+
+          <button type="submit" class="btn btn-agro w-100 py-2 shadow-sm my-3">
+            {% if role == 'seller' %}Create Seller Central Account{% else %}Register Account{% endif %}
+          </button>
+        </form>
+
+        <div class="text-center mt-3 small text-muted">
+          Already registered? 
+          <a href="{% if role == 'seller' %}{% url 'seller_login' %}{% else %}{% url 'login' %}{% endif %}" class="fw-bold text-decoration-none" style="color: #174b2a;">
+            Sign in here
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

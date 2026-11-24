@@ -3,14 +3,20 @@
 
 {% block content %}
 <div class="container py-3">
+  <!-- Brand Header -->
+  <div class="text-center mb-4">
+    <div class="d-inline-flex align-items-center p-2 px-4 rounded-pill shadow-sm" style="background: #174b2a; color: white;">
+      <span class="fs-4 fw-bold tracking-wide">🌱 OM SAI AGRO</span>
+    </div>
+  </div>
+
   <div class="row justify-content-center">
     <div class="col-12 col-md-8 col-lg-5">
-      <div class="card border rounded-3 shadow-sm bg-white p-4 p-md-5 mb-4">
-        <!-- Logo & Header -->
+      <div class="card agro-card p-4 p-md-5 mb-4">
+        <!-- Header -->
         <div class="text-center mb-4">
-          <div class="fs-2 mb-1">🌱</div>
-          <h2 class="fw-bold text-dark mb-1">Welcome Back</h2>
-          <p class="text-muted small">Sign in to your OM SAI AGRO customer account.</p>
+          <h2 class="fw-bold mb-1" style="color: #174b2a; font-size: 1.75rem;">Customer Sign In</h2>
+          <p class="text-muted small">Sign in to track orders, manage your cart, and purchase farm essentials.</p>
         </div>
 
         {% if form.errors %}
@@ -46,26 +52,26 @@
             <input type="password" name="password" autocomplete="current-password" required class="form-control" id="id_password" placeholder="••••••••">
           </div>
 
-          <button type="submit" class="btn btn-success w-100 fw-bold py-2 shadow-sm mb-3">
+          <button type="submit" class="btn btn-agro w-100 py-2 shadow-sm mb-3">
             Sign In to Store
           </button>
         </form>
 
         <div class="text-center mt-3 small text-muted">
-          New customer? <a href="{% url 'register_customer' %}" class="text-success fw-bold text-decoration-none">Create a customer account</a>
+          New customer? <a href="{% url 'register_customer' %}" class="fw-bold text-decoration-none" style="color: #174b2a;">Create a customer account</a>
         </div>
       </div>
 
       <!-- Seller Central Callout Card -->
-      <div class="card border rounded-3 shadow-sm p-4 bg-white text-center">
+      <div class="card agro-card p-4 text-center" style="background: linear-gradient(135deg, #f0f8ee 0%, #ffffff 100%);">
         <div class="d-flex align-items-center justify-content-center gap-2 mb-2">
           <span class="fs-4">🏪</span>
-          <h5 class="fw-bold text-dark mb-0">Are you an Agri Seller / Dealer?</h5>
+          <h5 class="fw-bold mb-0" style="color: #174b2a;">Are you an Agri Seller / Dealer?</h5>
         </div>
         <p class="text-muted small mb-3">
           Manage your farm product catalog, stock inventory, and customer orders via our dedicated Amazon-style Seller Central.
         </p>
-        <a href="{% url 'seller_login' %}" class="btn fw-semibold w-100 py-2 text-dark shadow-sm" style="background: #ff9900; border-color: #de8300;">
+        <a href="{% url 'seller_login' %}" class="btn btn-outline-agro w-100 py-2 shadow-sm">
           Sign In to Seller Central →
         </a>
       </div>
