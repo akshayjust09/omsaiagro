@@ -1,4 +1,5 @@
 import base64
+import random
 from datetime import timedelta
 from decimal import Decimal
 from django.contrib import messages
@@ -10,8 +11,8 @@ from django.db.models import Q, Sum
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.views.decorators.http import require_POST
-from .forms import RegisterForm, ProductForm
-from .models import Product, Order, OrderItem
+from .forms import RegisterForm, CustomerRegisterForm, ProductForm, OTPRequestForm, OTPVerifyForm
+from .models import Product, Order, OrderItem, OTPToken, User
 
 def home(request):
     category = request.GET.get("category", "").strip()
@@ -47,7 +48,17 @@ def product_detail(request, pk):
     })
 
 def register_customer(request):
-    return register_role(request, "customer")
+    if request.user.is_authenticated:
+        return redirect("home")
+    form = CustomerRegisterForm(request.POST or None)
+    if request.method == "POST" and form.is_valid():
+        user = form.save(commit=False)
+        user.role = "customer"
+        user.save()
+        login(request, user)
+        messages.success(request, "Welcome to OM SAI AGRO! Your account has been created.")
+        return redirect("home")
+    return render(request, "store/register.html", {"form": form, "role": "customer"})
 
 def register_seller(request):
     return register_role(request, "seller")
@@ -64,6 +75,102 @@ def register_role(request, role):
         messages.success(request, "Your account has been created.")
         return redirect("seller_dashboard" if role == "seller" else "home")
     return render(request, "store/register.html", {"form": form, "role": role})
+
+
+# ---------------------------------------------------------------------------
+# Customer OTP Login Flow
+# ---------------------------------------------------------------------------
+def _generate_otp():
+    return str(random.randint(100000, 999999))
+
+
+def customer_otp_request(request):
+    """Step 1: Customer enters username or mobile to request an OTP."""
+    if request.user.is_authenticated:
+        return redirect("home")
+
+    form = OTPRequestForm(request.POST or None)
+    otp_display = None   # For demo/dev mode — shown on screen
+
+    if request.method == "POST" and form.is_valid():
+        identifier = form.cleaned_data["username"].strip()
+
+        # Try to find user by username or phone
+        user = None
+        try:
+            user = User.objects.get(username=identifier)
+        except User.DoesNotExist:
+            if identifier.isdigit():
+                user = User.objects.filter(phone=identifier).first()
+
+        if user is None or user.role != "customer":
+            messages.error(request, "No customer account found with that username or mobile number.")
+            return render(request, "store/customer_otp_request.html", {"form": form})
+
+        # Invalidate old OTPs
+        OTPToken.objects.filter(user=user, purpose="login", is_used=False).update(is_used=True)
+
+        otp_code = _generate_otp()
+        OTPToken.objects.create(user=user, otp=otp_code, purpose="login")
+
+        # ----- DEMO MODE: show OTP on screen -----
+        # In production, replace this with SMS/email dispatch (Twilio / MSG91 / SendGrid)
+        otp_display = otp_code
+        messages.info(
+            request,
+            f"🔐 OTP generated for demo: {otp_code}  "
+            "(In production this will be sent to your registered mobile)"
+        )
+
+        return render(request, "store/customer_otp_verify.html", {
+            "form_verify": __import__("store.forms", fromlist=["OTPVerifyForm"]).OTPVerifyForm(
+                initial={"username": user.username}
+            ),
+            "username": user.username,
+            "otp_display": otp_display,
+        })
+
+    return render(request, "store/customer_otp_request.html", {"form": form})
+
+
+def customer_otp_verify(request):
+    """Step 2: Customer submits OTP to complete login."""
+    if request.user.is_authenticated:
+        return redirect("home")
+
+    if request.method != "POST":
+        return redirect("customer_otp_request")
+
+    from .forms import OTPVerifyForm as _OTPVerifyForm
+    form = _OTPVerifyForm(request.POST)
+    if not form.is_valid():
+        messages.error(request, "Invalid submission. Please try again.")
+        return redirect("customer_otp_request")
+
+    username = form.cleaned_data["username"]
+    otp_code = form.cleaned_data["otp_code"]
+
+    try:
+        user = User.objects.get(username=username)
+    except User.DoesNotExist:
+        messages.error(request, "Session expired. Please request a new OTP.")
+        return redirect("customer_otp_request")
+
+    # Validate OTP
+    token = OTPToken.objects.filter(user=user, otp=otp_code, purpose="login", is_used=False).first()
+    if token is None or not token.is_valid():
+        messages.error(request, "Invalid or expired OTP. Please request a new one.")
+        return render(request, "store/customer_otp_verify.html", {
+            "form_verify": form,
+            "username": username,
+        })
+
+    token.is_used = True
+    token.save(update_fields=["is_used"])
+
+    login(request, user)
+    messages.success(request, f"Welcome back, {user.username}! You are now logged in.")
+    return redirect(request.GET.get("next") or "home")
 
 def seller_login(request):
     if request.user.is_authenticated:
@@ -89,27 +196,14 @@ def seller_login(request):
     return render(request, "store/seller_login.html", {"form": form})
 
 def user_login(request):
+    """Redirect customers to OTP login; sellers use password login."""
+    # Non-authenticated visitors who click /accounts/login/ go to OTP flow
     if request.user.is_authenticated:
         if request.user.role == "seller" or request.user.is_staff:
             return redirect("seller_dashboard")
         return redirect("home")
-
-    form = AuthenticationForm(request, data=request.POST or None)
-    if request.method == "POST":
-        if form.is_valid():
-            user = form.get_user()
-            login(request, user)
-            messages.success(request, f"Welcome back, {user.username}!")
-            next_url = request.GET.get("next") or request.POST.get("next")
-            if next_url:
-                return redirect(next_url)
-            if user.role == "seller" or user.is_staff:
-                return redirect("seller_dashboard")
-            return redirect("home")
-        else:
-            messages.error(request, "Invalid username or password.")
-
-    return render(request, "store/login.html", {"form": form})
+    # Redirect to OTP request page for customers
+    return redirect("customer_otp_request")
 
 @login_required
 def seller_dashboard(request):

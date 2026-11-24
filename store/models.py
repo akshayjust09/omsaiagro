@@ -6,9 +6,29 @@ class User(AbstractUser):
     ROLE_CHOICES = [("customer", "Customer"), ("seller", "Seller")]
     role = models.CharField(max_length=20, choices=ROLE_CHOICES, default="customer")
     business_name = models.CharField(max_length=160, blank=True)
+    phone = models.CharField(max_length=15, blank=True, verbose_name="Mobile Number")
+    address = models.TextField(blank=True, verbose_name="Delivery Address")
 
     def __str__(self):
         return self.username
+
+
+class OTPToken(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="otp_tokens")
+    otp = models.CharField(max_length=6)
+    created_at = models.DateTimeField(auto_now_add=True)
+    is_used = models.BooleanField(default=False)
+    purpose = models.CharField(max_length=20, default="login")  # login / register
+
+    class Meta:
+        ordering = ["-created_at"]
+
+    def is_valid(self):
+        from django.utils import timezone
+        return not self.is_used and (timezone.now() - self.created_at).seconds < 300  # 5 min
+
+    def __str__(self):
+        return f"OTP for {self.user.username} ({self.purpose})"
 
 class Product(models.Model):
     CATEGORY_CHOICES = [

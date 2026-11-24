@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+{% block title %}Enter OTP – OM SAI AGRO{% endblock %}
+
+{% block extra_head %}
+<style>
+  .otp-box input {
+    letter-spacing: 0.5em;
+    font-size: 2rem;
+    text-align: center;
+    font-weight: 700;
+    color: #174b2a;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-5" style="max-width:480px;">
+  <!-- Logo -->
+  <div class="text-center mb-4">
+    <div class="d-inline-flex align-items-center justify-content-center rounded-circle mb-3"
+         style="width:72px;height:72px;background:#174b2a;">
+      <span style="font-size:2rem;">🌿</span>
+    </div>
+    <h1 class="fw-bold" style="color:#174b2a;font-size:1.6rem;">OM SAI AGRO</h1>
+    <p class="text-muted mb-0">Verify your OTP</p>
+  </div>
+
+  <!-- Messages -->
+  {% for m in messages %}
+    <div class="alert alert-{{ m.tags|default:'info' }} alert-dismissible fade show" role="alert">
+      {{ m }}
+      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+  {% endfor %}
+
+  {% if otp_display %}
+  <!-- Demo OTP display box -->
+  <div class="alert alert-warning d-flex align-items-center gap-3 rounded-3 shadow-sm mb-3" role="alert">
+    <span style="font-size:1.5rem;">📱</span>
+    <div>
+      <strong>Demo OTP (testing only):</strong>
+      <span class="fs-4 fw-bold ms-2" style="color:#174b2a;letter-spacing:0.3em;">{{ otp_display }}</span>
+      <br><small class="text-muted">In production, this will be sent to your mobile number.</small>
+    </div>
+  </div>
+  {% endif %}
+
+  <div class="card border-0 shadow-sm rounded-4">
+    <div class="card-body p-4">
+      <h5 class="fw-semibold mb-1" style="color:#174b2a;">Enter the 6-digit OTP</h5>
+      <p class="text-muted small mb-4">
+        OTP sent for account <strong>{{ username }}</strong>. Valid for <strong>5 minutes</strong>.
+      </p>
+
+      <form method="post" action="{% url 'customer_otp_verify' %}">
+        {% csrf_token %}
+        <!-- Hidden username field -->
+        <input type="hidden" name="username" value="{{ username }}">
+
+        <div class="mb-4 otp-box">
+          <label class="form-label fw-semibold small">OTP Code</label>
+          <input type="text"
+                 name="otp_code"
+                 class="form-control form-control-lg text-center"
+                 maxlength="6"
+                 minlength="6"
+                 inputmode="numeric"
+                 autocomplete="one-time-code"
+                 placeholder="_ _ _ _ _ _"
+                 autofocus
+                 required>
+          {% if form_verify.otp_code.errors %}
+            <div class="text-danger small mt-1">{{ form_verify.otp_code.errors|join:", " }}</div>
+          {% endif %}
+        </div>
+
+        <button type="submit" class="btn w-100 fw-bold py-2 rounded-3"
+                style="background:#174b2a;color:#fff;">
+          ✅ Verify & Login
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <div class="text-center mt-3 small">
+    <a href="{% url 'customer_otp_request' %}" style="color:#174b2a;">← Request new OTP</a>
+    &nbsp;|&nbsp;
+    <a href="{% url 'register_customer' %}" style="color:#174b2a;">Create account</a>
+  </div>
+</div>
+{% endblock %}
